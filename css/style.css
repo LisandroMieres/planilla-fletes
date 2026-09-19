@@ -34,7 +34,7 @@ body {
     radial-gradient(800px 520px at 5% 108%, rgba(148, 163, 184, 0.4), transparent 60%),
     radial-gradient(700px 480px at 50% 55%, rgba(120, 140, 165, 0.16), transparent 65%),
     var(--bg);
-  padding-bottom: calc(430px + env(safe-area-inset-bottom));
+  padding-bottom: calc(180px + env(safe-area-inset-bottom));
   -webkit-font-smoothing: antialiased;
 }
 
@@ -284,18 +284,18 @@ textarea.input { resize: vertical; min-height: 104px; }
 
 .btn {
   font-family: inherit;
-  font-size: 1.65rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  border-radius: 18px;
+  border-radius: 14px;
   cursor: pointer;
-  min-height: 88px;
+  min-height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   transition: transform 0.05s ease, filter 0.15s ease;
   width: 100%;
-  padding: 28px 30px;
+  padding: 14px 20px;
 }
 
 .btn:active { transform: scale(0.98); }
@@ -316,8 +316,8 @@ textarea.input { resize: vertical; min-height: 104px; }
   color: #fca5a5;
   border: 2px solid rgba(252, 165, 165, 0.55);
   box-shadow: none;
-  min-height: 74px;
-  font-size: 1.5rem;
+  min-height: 48px;
+  font-size: 1rem;
 }
 .btn-ghost:hover { background: rgba(220, 38, 38, 0.18); }
 
@@ -340,13 +340,13 @@ textarea.input { resize: vertical; min-height: 104px; }
 #btnLimpiar,
 #btnExport {
   width: 100%;
-  min-height: 176px;
-  padding: 38px 32px;
-  font-size: 2.15rem;
+  min-height: 50px;
+  padding: 13px 20px;
+  font-size: 1.05rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 20px;
+  border-radius: 14px;
 }
 
 #btnLimpiar {
