@@ -3,50 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Planilla de Control de Fletes digital. Registro offline de viajes, documentación y exportación a Excel.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Planilla de Control de Fletes. Registro offline de viajes, documentación de carga y exportación a Excel.">
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Planilla de Fletes</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="ic-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+      <path d="M15 18H9"/>
+      <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
+      <circle cx="17" cy="18" r="2"/>
+      <circle cx="7" cy="18" r="2"/>
+    </symbol>
+    <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </symbol>
+    <symbol id="ic-erase" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21H7z"/>
+      <path d="M22 21H7"/>
+      <path d="m5 11 9 9"/>
+    </symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="3 6 5 6 21 6"/>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    </symbol>
+    <symbol id="ic-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="12 5 19 12 12 19"/>
+    </symbol>
+    <symbol id="ic-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+      <polyline points="3.29 7 12 12 20.71 7"/>
+      <line x1="12" y1="22" x2="12" y2="12"/>
+    </symbol>
+    <symbol id="ic-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="8" y1="13" x2="16" y2="13"/>
+      <line x1="8" y1="17" x2="13" y2="17"/>
+    </symbol>
+  </svg>
+
   <header class="topbar">
     <div class="topbar-inner">
-      <div>
-        <h1>Planilla de Fletes</h1>
-        <p class="subtitle">Registro de viajes y documentación</p>
+      <div class="brand">
+        <span class="brand-icon">
+          <svg class="ic"><use href="#ic-truck"></use></svg>
+        </span>
+        <div>
+          <h1>Planilla de Fletes</h1>
+          <p class="subtitle">Control de viajes y documentación</p>
+        </div>
       </div>
-      <span id="onlineBadge" class="badge badge-off" title="Estado de conexión">offline</span>
+      <span id="onlineBadge" class="badge badge-off" title="Estado de conexión">
+        <span class="dot"></span>offline
+      </span>
     </div>
   </header>
 
   <main class="container">
 
-    <section class="card" id="cardMont">
-      <h2>Mes de trabajo</h2>
-      <input type="month" id="mes" class="input input-month">
+    <section class="card card-resumen">
+      <div class="resumen-head">
+        <h2>Mes de trabajo</h2>
+        <input type="month" id="mes" class="input input-month">
+      </div>
       <p id="resumen" class="resumen"></p>
+      <div class="stats">
+        <div class="stat">
+          <span id="statViajes" class="stat-num">0</span>
+          <span class="stat-label">Viajes</span>
+        </div>
+        <div class="stat">
+          <span id="statKm" class="stat-num">0</span>
+          <span class="stat-label">Kilómetros</span>
+        </div>
+        <div class="stat">
+          <span id="statProm" class="stat-num">0</span>
+          <span class="stat-label">Promedio km</span>
+        </div>
+      </div>
     </section>
 
-    <section class="card">
-      <h2>Datos fijos</h2>
-      <div class="field">
-        <label for="camion">Camión N°</label>
-        <input type="text" id="camion" class="input" inputmode="text" placeholder="Ej: 1234" autocomplete="off">
+    <section class="card card-config">
+      <div class="card-title">
+        <svg class="ic ic-title"><use href="#ic-truck"></use></svg>
+        <h2>Datos fijos</h2>
       </div>
-      <div class="field">
-        <label for="conductor">Conductor</label>
-        <input type="text" id="conductor" class="input" inputmode="text" placeholder="Nombre y apellido" autocomplete="off">
+      <div class="grid-2">
+        <div class="field">
+          <label for="camion">Camión N°</label>
+          <input type="text" id="camion" class="input" inputmode="text" placeholder="1234" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="conductor">Conductor</label>
+          <input type="text" id="conductor" class="input" inputmode="text" placeholder="Nombre y apellido" autocomplete="off">
+        </div>
       </div>
     </section>
 
     <form id="formViaje" class="card" autocomplete="off">
-      <h2>Nuevo viaje</h2>
+      <div class="card-title">
+        <svg class="ic ic-title ic-amber"><use href="#ic-box"></use></svg>
+        <h2>Nuevo viaje</h2>
+      </div>
 
       <fieldset>
-        <legend>Operación de transporte — Origen</legend>
+        <legend><span class="step">1</span> Operación de transporte — Origen</legend>
         <div class="grid-2">
           <div class="field">
             <label for="fechaOrigen">Fecha de salida</label>
@@ -59,16 +131,16 @@
         </div>
         <div class="field">
           <label for="origen">Origen</label>
-          <input type="text" id="origen" class="input" inputmode="text" placeholder="Localidad / Planta de carga" required>
+          <input type="text" id="origen" class="input" inputmode="text" placeholder="Localidad / planta de carga" required>
         </div>
         <div class="field">
           <label for="kmOrigen">Kilómetros (odómetro)</label>
-          <input type="number" id="kmOrigen" class="input" inputmode="numeric" min="0" step="1" placeholder="Ej: 102500" required>
+          <input type="number" id="kmOrigen" class="input" inputmode="numeric" min="0" step="1" placeholder="102500" required>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Operación de transporte — Destino</legend>
+        <legend><span class="step">2</span> Operación de transporte — Destino</legend>
         <div class="grid-2">
           <div class="field">
             <label for="fechaDestino">Fecha de llegada</label>
@@ -81,20 +153,20 @@
         </div>
         <div class="field">
           <label for="destino">Destino</label>
-          <input type="text" id="destino" class="input" inputmode="text" placeholder="Localidad / Planta de descarga" required>
+          <input type="text" id="destino" class="input" inputmode="text" placeholder="Localidad / planta de descarga" required>
         </div>
         <div class="field">
           <label for="kmDestino">Kilómetros (odómetro)</label>
-          <input type="number" id="kmDestino" class="input" inputmode="numeric" min="0" step="1" placeholder="Ej: 102780" required>
+          <input type="number" id="kmDestino" class="input" inputmode="numeric" min="0" step="1" placeholder="102780" required>
         </div>
         <div class="distancia">
-          <span>Distancia del viaje</span>
-          <output id="distanciaShow" class="distancia-val">0 km</output>
+          <span><svg class="ic ic-arrow-sm"><use href="#ic-arrow"></use></svg> Distancia del viaje</span>
+          <output id="distanciaShow" class="distancia-val">—</output>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Documentación de carga</legend>
+        <legend><span class="step">3</span> Documentación de carga</legend>
         <div class="grid-2">
           <div class="field">
             <label for="comprobante">N° de comprobante</label>
@@ -139,19 +211,31 @@
         </div>
       </fieldset>
 
-      <button type="submit" id="btnGuardar" class="btn btn-primary btn-block">Guardar viaje</button>
+      <button type="submit" id="btnGuardar" class="btn btn-primary btn-block">
+        <svg class="ic"><use href="#ic-box"></use></svg>
+        Guardar viaje
+      </button>
     </form>
 
     <section class="card">
-      <h2>Viajes cargados</h2>
+      <div class="card-title">
+        <svg class="ic ic-title ic-green"><use href="#ic-file"></use></svg>
+        <h2>Viajes cargados</h2>
+      </div>
       <div id="listaViajes" class="lista"></div>
     </section>
 
   </main>
 
   <nav class="bottombar">
-    <button type="button" id="btnLimpiar" class="btn btn-ghost">Limpiar mes</button>
-    <button type="button" id="btnExport" class="btn btn-success">Descargar Excel (.xlsx)</button>
+    <button type="button" id="btnLimpiar" class="btn btn-ghost">
+      <svg class="ic"><use href="#ic-erase"></use></svg>
+      Limpiar mes
+    </button>
+    <button type="button" id="btnExport" class="btn btn-success">
+      <svg class="ic"><use href="#ic-download"></use></svg>
+      Descargar Excel (.xlsx)
+    </button>
   </nav>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

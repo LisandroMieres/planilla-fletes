@@ -16,6 +16,28 @@
   var toast = $('toast');
   var badge = $('onlineBadge');
 
+  var IC_TRUCK = '<svg class="ic"><use href="#ic-truck"></use></svg>';
+  var IC_ARROW = '<svg class="ic"><use href="#ic-arrow"></use></svg>';
+  var IC_TRASH = '<svg class="ic"><use href="#ic-trash"></use></svg>';
+
+  function el(tag, cls) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    return n;
+  }
+
+  function formatearFecha(iso) {
+    if (!iso) return '—';
+    var p = iso.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+
+  function addChip(parent, txt, cls) {
+    var c = el('span', 'chip-info' + (cls ? ' ' + cls : ''));
+    c.textContent = txt;
+    parent.appendChild(c);
+  }
+
   function hoyISO() {
     var d = new Date();
     var m = String(d.getMonth() + 1).padStart(2, '0');
@@ -103,9 +125,16 @@
     listaViajes.innerHTML = '';
 
     if (!registros.length) {
-      var vacio = document.createElement('p');
-      vacio.className = 'vacio';
-      vacio.textContent = 'Todavía no hay viajes cargados en este mes.';
+      var vacio = el('div', 'vacio');
+      var vIcon = document.createElement('span');
+      vIcon.innerHTML = IC_TRUCK;
+      var vStrong = el('strong');
+      vStrong.textContent = 'Todavía no hay viajes';
+      var vP = el('p');
+      vP.textContent = 'Cargá tu primer viaje con el formulario ↑';
+      vacio.appendChild(vIcon);
+      vacio.appendChild(vStrong);
+      vacio.appendChild(vP);
       listaViajes.appendChild(vacio);
     } else {
       registros.slice().reverse().forEach(function (r) {
@@ -114,69 +143,76 @@
       });
     }
 
-    var label = registros.length === 1 ? 'viaje' : 'viajes';
-    resumen.textContent = nombreMes(mes) + ': ' + registros.length + ' ' + label + ' · ' + totalKm + ' km recorridos';
+    $('statViajes').textContent = registros.length;
+    $('statKm').textContent = totalKm;
+    $('statProm').textContent = registros.length ? Math.round(totalKm / registros.length) : 0;
+    resumen.textContent = nombreMes(mes);
   }
 
   function buildItem(r) {
-    var div = document.createElement('div');
-    div.className = 'viaje';
+    var div = el('div', 'viaje');
 
-    var head = document.createElement('div');
-    head.className = 'viaje-head';
+    var top = el('div', 'viaje-top');
+    var info = el('div', 'viaje-info');
 
-    var info = document.createElement('div');
-    info.style.flex = '1';
+    var fechas = el('div', 'viaje-fechas');
+    var salida = el('span', 'chip chip-salida');
+    salida.textContent = 'Salida ' + formatearFecha(r.fechaOrigen) + (r.horaOrigen ? ' ' + r.horaOrigen : '');
+    fechas.appendChild(salida);
+    var llegada = el('span', 'chip chip-llegada');
+    llegada.textContent = 'Llegada ' + formatearFecha(r.fechaDestino) + (r.horaDestino ? ' ' + r.horaDestino : '');
+    fechas.appendChild(llegada);
+    info.appendChild(fechas);
 
-    var h3 = document.createElement('h3');
-    var fO = parseFecha(r.fechaOrigen);
-    h3.textContent = (fO.dia || '--') + '/' + (fO.mes || '--') + '/' + (fO.anio || '----') +
-      (r.horaOrigen ? ' ' + r.horaOrigen : '') +
-      ' — ' + (r.origen || '') + ' → ' + (r.destino || '');
-    info.appendChild(h3);
+    var ruta = el('div', 'viaje-ruta');
+    var o = el('span', 'lugar');
+    o.textContent = r.origen || 'S/D';
+    var a = document.createElement('span');
+    a.innerHTML = IC_ARROW;
+    var d = el('span', 'lugar');
+    d.textContent = r.destino || 'S/D';
+    ruta.appendChild(o);
+    ruta.appendChild(a);
+    ruta.appendChild(d);
+    info.appendChild(ruta);
 
-    var meta = document.createElement('div');
-    meta.className = 'viaje-meta';
+    top.appendChild(info);
 
-    if (r.comprobante) {
-      var comp = document.createElement('span');
-      comp.textContent = 'Comp.: ' + r.comprobante;
-      meta.appendChild(comp);
-    }
-    if (r.tipoCarga) {
-      var tipo = document.createElement('span');
-      tipo.textContent = r.tipoCarga;
-      meta.appendChild(tipo);
-    }
-
-    var km = document.createElement('span');
-    km.className = 'viaje-km';
+    var side = el('div', 'viaje-side');
+    var km = el('span', 'pill-km');
     km.textContent = (r.distancia >= 0 ? r.distancia : 'n/d') + ' km';
-    meta.appendChild(km);
-
-    var llegada = document.createElement('span');
-    var fD = parseFecha(r.fechaDestino);
-    llegada.textContent = 'Llegada: ' + (fD.dia || '--') + '/' + (fD.mes || '--') +
-      (r.horaDestino ? ' ' + r.horaDestino : '');
-    meta.appendChild(llegada);
-
-    info.appendChild(meta);
-    head.appendChild(info);
+    side.appendChild(km);
 
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn-del';
-    btn.textContent = '✕';
     btn.title = 'Borrar viaje';
     btn.setAttribute('aria-label', 'Borrar viaje');
+    btn.innerHTML = IC_TRASH;
     btn.addEventListener('click', function () {
       if (window.confirm('¿Borrar este viaje?')) {
         borrarRegistro(r.id);
       }
     });
-    head.appendChild(btn);
+    side.appendChild(btn);
 
-    div.appendChild(head);
+    top.appendChild(side);
+    div.appendChild(top);
+
+    var meta = el('div', 'viaje-meta');
+    if (r.comprobante) addChip(meta, 'Comp. ' + r.comprobante);
+    if (r.tipoCarga) addChip(meta, r.tipoCarga);
+    var DOC_LABELS = { f425a: '4.2.5 (a)', f425b: '4.2.5 (b)', f426: '4.2.6', f4217: '4.2.17' };
+    ['f425a', 'f425b', 'f426', 'f4217'].forEach(function (doc) {
+      if (r[doc]) {
+        var c = el('span', 'chip-ok');
+        c.textContent = DOC_LABELS[doc];
+        meta.appendChild(c);
+      }
+    });
+    if (r.observaciones) addChip(meta, r.observaciones);
+    div.appendChild(meta);
+
     return div;
   }
 
@@ -356,13 +392,13 @@
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
 
-     var nombreArchivo = 'Planilla_Fletes_' + mes + '.xlsx';
+    var nombreArchivo = 'Planilla_Fletes_' + mes + '.xlsx';
     XLSX.writeFile(wb, nombreArchivo);
     mostrarToast('Excel descargado');
   }
 
   function setOnline(on) {
-    badge.textContent = on ? 'online' : 'offline';
+    $('badgeTexto').textContent = on ? 'online' : 'offline';
     badge.classList.toggle('badge-on', on);
     badge.classList.toggle('badge-off', !on);
   }
