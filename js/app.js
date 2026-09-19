@@ -96,6 +96,11 @@
     return n.toLocaleString('es-AR');
   }
 
+  function digitos(input) {
+    if (!input) return '';
+    return input.value.replace(/[^0-9]/g, '');
+  }
+
   function calcularDistancia() {
     var a = leerKM($('kmOrigen'));
     var b = leerKM($('kmDestino'));
@@ -104,6 +109,7 @@
       return;
     }
     var d = b - a;
+    if ($('kmDoble').checked) d = d * 2;
     distanciaShow.value = d < 0 ? 'Verificar km (negativo)' : nro(d) + ' km';
   }
 
@@ -156,7 +162,7 @@
     div.appendChild(fechas);
 
     var km = el('div', 'viaje-linea viaje-km');
-    km.textContent = 'Distancia: ' + (r.distancia >= 0 ? nro(r.distancia) : 'n/d') + ' km';
+    km.textContent = 'Distancia: ' + (r.distancia >= 0 ? nro(r.distancia) : 'n/d') + ' km' + (r.kmDoble ? ' · doble' : '');
     div.appendChild(km);
 
     var doc = el('div', 'viaje-linea viaje-doc');
@@ -164,9 +170,9 @@
     if (r.comprobante) partes.push('Comp: ' + r.comprobante);
     if (r.tipoCarga) partes.push('Carga: ' + r.tipoCarga);
     var marcados = [];
-    if (r.f425a) marcados.push('4.2.5 (a)');
-    if (r.f425b) marcados.push('4.2.5 (b)');
-    if (r.f426) marcados.push('4.2.6');
+    if (r.f425a) marcados.push('4.2.5 (a): ' + r.f425a);
+    if (r.f425b) marcados.push('4.2.5 (b): ' + r.f425b);
+    if (r.f426) marcados.push('4.2.6: ' + fechaTexto(r.f426, ''));
     if (r.f4217) marcados.push('4.2.17');
     if (marcados.length) partes.push('Doc: ' + marcados.join(', '));
     if (r.observaciones) partes.push('Obs: ' + r.observaciones);
@@ -233,6 +239,8 @@
       return;
     }
 
+    var kmDoble = chequearCheckbox('kmDoble');
+
     var registro = {
       id: Date.now() + '-' + Math.floor(Math.random() * 9000 + 1000),
       camion: camion,
@@ -245,12 +253,13 @@
       horaDestino: horaDestino,
       destino: destino,
       kmDestino: kmDestino,
-      distancia: kmDestino - kmOrigen,
+      distancia: (kmDestino - kmOrigen) * (kmDoble ? 2 : 1),
+      kmDoble: kmDoble,
       comprobante: $('comprobante').value.trim(),
       tipoCarga: $('tipoCarga').value.trim(),
-      f425a: chequearCheckbox('f425a'),
-      f425b: chequearCheckbox('f425b'),
-      f426: chequearCheckbox('f426'),
+      f425a: digitos($('f425a')),
+      f425b: digitos($('f425b')),
+      f426: $('f426').value,
       f4217: chequearCheckbox('f4217'),
       observaciones: $('observaciones').value.trim(),
       creado: new Date().toISOString()
@@ -309,16 +318,26 @@
       'Destino',
       'Kilómetros (destino)',
       'Distancia (km)',
+      'Kilómetro doble',
       'N° de comprobante',
       'Tipo de carga',
-      '4.2.5 (a)',
-      '4.2.5 (b)',
-      '4.2.6',
+      'Estadía 4.2.5 (a)',
+      'Estadía 4.2.5 (b)',
+      'Control descarga 4.2.6',
       '4.2.17',
       'Observaciones'
     ];
 
     function siNo(v) { return v ? 'Sí' : 'No'; }
+    function doc425(v) {
+      if (v === '' || v === undefined || v === null || v === false) return 'No';
+      return v === true ? 'Sí' : v;
+    }
+    function docFecha(v) {
+      if (v === true) return 'Sí';
+      if (v === false || v === '' || v === undefined || v === null) return 'No';
+      return fechaTexto(v, '');
+    }
 
     var filas = [headers];
     registros.forEach(function (r) {
@@ -340,35 +359,45 @@
         r.destino,
         r.kmDestino,
         r.distancia,
+        siNo(r.kmDoble),
         r.comprobante,
         r.tipoCarga,
-        siNo(r.f425a),
-        siNo(r.f425b),
-        siNo(r.f426),
+        doc425(r.f425a),
+        doc425(r.f425b),
+        docFecha(r.f426),
         siNo(r.f4217),
         r.observaciones
       ]);
     });
 
     if (typeof XLSX === 'undefined') {
-      mostrarToast('Librería de Excel no disponible (sin conexión)');
+      mostrarToast('Falta la librería de Excel. Verificá que js/xlsx.full.min.js esté subido');
       return;
     }
 
-    var ws = XLSX.utils.aoa_to_sheet(filas);
+    var ws;
+    try {
+      ws = XLSX.utils.aoa_to_sheet(filas);
+    } catch (err) {
+      mostrarToast('Error al generar el Excel: ' + err.message);
+      return;
+    }
     ws['!cols'] = [
       { wch: 8 }, { wch: 20 }, { wch: 6 }, { wch: 6 }, { wch: 7 }, { wch: 8 },
       { wch: 22 }, { wch: 12 }, { wch: 6 }, { wch: 6 }, { wch: 7 }, { wch: 8 },
-      { wch: 22 }, { wch: 12 }, { wch: 12 }, { wch: 16 }, { wch: 16 },
-      { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 30 }
+      { wch: 22 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 16 }, { wch: 16 },
+      { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 30 }
     ];
 
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
-
-    var nombreArchivo = 'Planilla_Fletes_' + mes + '.xlsx';
-    XLSX.writeFile(wb, nombreArchivo);
-    mostrarToast('Excel descargado');
+    try {
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Planilla');
+      var nombreArchivo = 'Planilla_Fletes_' + mes + '.xlsx';
+      XLSX.writeFile(wb, nombreArchivo);
+      mostrarToast('Excel descargado');
+    } catch (err) {
+      mostrarToast('Error al descargar: ' + err.message);
+    }
   }
 
   function setOnline(on) {
@@ -415,6 +444,10 @@
     renderLista();
     registrarServiceWorker();
   }
+
+  window.addEventListener('error', function (ev) {
+    if (ev && ev.message) mostrarToast('Error: ' + ev.message);
+  });
 
   document.addEventListener('DOMContentLoaded', init);
 })();
