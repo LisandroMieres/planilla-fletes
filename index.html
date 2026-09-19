@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Planilla de Control de Fletes digital. Registro offline de viajes, documentación y exportación a Excel.">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>Planilla de Fletes</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <h1>Planilla de Fletes</h1>
+        <p class="subtitle">Registro de viajes y documentación</p>
+      </div>
+      <span id="onlineBadge" class="badge badge-off" title="Estado de conexión">offline</span>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="card" id="cardMont">
+      <h2>Mes de trabajo</h2>
+      <input type="month" id="mes" class="input input-month">
+      <p id="resumen" class="resumen"></p>
+    </section>
+
+    <section class="card">
+      <h2>Datos fijos</h2>
+      <div class="field">
+        <label for="camion">Camión N°</label>
+        <input type="text" id="camion" class="input" inputmode="text" placeholder="Ej: 1234" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="conductor">Conductor</label>
+        <input type="text" id="conductor" class="input" inputmode="text" placeholder="Nombre y apellido" autocomplete="off">
+      </div>
+    </section>
+
+    <form id="formViaje" class="card" autocomplete="off">
+      <h2>Nuevo viaje</h2>
+
+      <fieldset>
+        <legend>Operación de transporte — Origen</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="fechaOrigen">Fecha de salida</label>
+            <input type="date" id="fechaOrigen" class="input" required>
+          </div>
+          <div class="field">
+            <label for="horaOrigen">Hora</label>
+            <input type="time" id="horaOrigen" class="input">
+          </div>
+        </div>
+        <div class="field">
+          <label for="origen">Origen</label>
+          <input type="text" id="origen" class="input" inputmode="text" placeholder="Localidad / Planta de carga" required>
+        </div>
+        <div class="field">
+          <label for="kmOrigen">Kilómetros (odómetro)</label>
+          <input type="number" id="kmOrigen" class="input" inputmode="numeric" min="0" step="1" placeholder="Ej: 102500" required>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Operación de transporte — Destino</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="fechaDestino">Fecha de llegada</label>
+            <input type="date" id="fechaDestino" class="input">
+          </div>
+          <div class="field">
+            <label for="horaDestino">Hora</label>
+            <input type="time" id="horaDestino" class="input">
+          </div>
+        </div>
+        <div class="field">
+          <label for="destino">Destino</label>
+          <input type="text" id="destino" class="input" inputmode="text" placeholder="Localidad / Planta de descarga" required>
+        </div>
+        <div class="field">
+          <label for="kmDestino">Kilómetros (odómetro)</label>
+          <input type="number" id="kmDestino" class="input" inputmode="numeric" min="0" step="1" placeholder="Ej: 102780" required>
+        </div>
+        <div class="distancia">
+          <span>Distancia del viaje</span>
+          <output id="distanciaShow" class="distancia-val">0 km</output>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Documentación de carga</legend>
+        <div class="grid-2">
+          <div class="field">
+            <label for="comprobante">N° de comprobante</label>
+            <input type="text" id="comprobante" class="input" inputmode="text" placeholder="Remito / factura">
+          </div>
+          <div class="field">
+            <label for="tipoCarga">Tipo de carga</label>
+            <input type="text" id="tipoCarga" class="input" list="tiposCarga" placeholder="Seleccione o escriba">
+            <datalist id="tiposCarga">
+              <option value="Cereales"></option>
+              <option value="Frutas y verduras"></option>
+              <option value="Carnes"></option>
+              <option value="Lácteos"></option>
+              <option value="Bebidas"></option>
+              <option value="Productos envasados"></option>
+              <option value="Carga general"></option>
+              <option value="Mercadería seca"></option>
+              <option value="Congelados"></option>
+              <option value="Refrigerados"></option>
+            </datalist>
+          </div>
+        </div>
+
+        <div class="checks">
+          <label class="check">
+            <input type="checkbox" id="f425a"> <span>4.2.5 (a)</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="f425b"> <span>4.2.5 (b)</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="f426"> <span>4.2.6</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" id="f4217"> <span>4.2.17</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label for="observaciones">Observaciones</label>
+          <textarea id="observaciones" class="input" rows="2" placeholder="Novedades, temperaturas, despacho..."></textarea>
+        </div>
+      </fieldset>
+
+      <button type="submit" id="btnGuardar" class="btn btn-primary btn-block">Guardar viaje</button>
+    </form>
+
+    <section class="card">
+      <h2>Viajes cargados</h2>
+      <div id="listaViajes" class="lista"></div>
+    </section>
+
+  </main>
+
+  <nav class="bottombar">
+    <button type="button" id="btnLimpiar" class="btn btn-ghost">Limpiar mes</button>
+    <button type="button" id="btnExport" class="btn btn-success">Descargar Excel (.xlsx)</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div class="noscript"><strong>Esta aplicación requiere JavaScript.</strong> Actívelo para poder registrar y exportar los viajes.</div>
+  </noscript>
+
+  <script src="js/xlsx.full.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
