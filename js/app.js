@@ -16,26 +16,10 @@
   var toast = $('toast');
   var badge = $('onlineBadge');
 
-  var IC_TRUCK = '<svg class="ic"><use href="#ic-truck"></use></svg>';
-  var IC_ARROW = '<svg class="ic"><use href="#ic-arrow"></use></svg>';
-  var IC_TRASH = '<svg class="ic"><use href="#ic-trash"></use></svg>';
-
   function el(tag, cls) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
     return n;
-  }
-
-  function formatearFecha(iso) {
-    if (!iso) return '—';
-    var p = iso.split('-');
-    return p[2] + '/' + p[1] + '/' + p[0];
-  }
-
-  function addChip(parent, txt, cls) {
-    var c = el('span', 'chip-info' + (cls ? ' ' + cls : ''));
-    c.textContent = txt;
-    parent.appendChild(c);
   }
 
   function hoyISO() {
@@ -97,15 +81,30 @@
     guardarConfig(cfg);
   }
 
+  function leerKM(input) {
+    var solo = input.value.replace(/[^0-9]/g, '');
+    return solo === '' ? NaN : parseInt(solo, 10);
+  }
+
+  function formatearKM(input) {
+    var solo = input.value.replace(/[^0-9]/g, '');
+    if (solo === '') { input.value = ''; return; }
+    input.value = parseInt(solo, 10).toLocaleString('es-AR');
+  }
+
+  function nro(n) {
+    return n.toLocaleString('es-AR');
+  }
+
   function calcularDistancia() {
-    var a = parseFloat($('kmOrigen').value);
-    var b = parseFloat($('kmDestino').value);
+    var a = leerKM($('kmOrigen'));
+    var b = leerKM($('kmDestino'));
     if (isNaN(a) || isNaN(b)) {
       distanciaShow.value = '—';
       return;
     }
     var d = b - a;
-    distanciaShow.value = d < 0 ? 'Verificar km (negativo)' : d + ' km';
+    distanciaShow.value = d < 0 ? 'Verificar km (negativo)' : nro(d) + ' km';
   }
 
   function mostrarToast(texto) {
@@ -114,7 +113,7 @@
     clearTimeout(mostrarToast._t);
     mostrarToast._t = setTimeout(function () {
       toast.classList.remove('show');
-    }, 2600);
+    }, 2800);
   }
 
   function renderLista() {
@@ -125,16 +124,8 @@
     listaViajes.innerHTML = '';
 
     if (!registros.length) {
-      var vacio = el('div', 'vacio');
-      var vIcon = document.createElement('span');
-      vIcon.innerHTML = IC_TRUCK;
-      var vStrong = el('strong');
-      vStrong.textContent = 'Todavía no hay viajes';
-      var vP = el('p');
-      vP.textContent = 'Cargá tu primer viaje con el formulario ↑';
-      vacio.appendChild(vIcon);
-      vacio.appendChild(vStrong);
-      vacio.appendChild(vP);
+      var vacio = el('p', 'vacio');
+      vacio.textContent = 'Todavía no hay viajes cargados en este mes.';
       listaViajes.appendChild(vacio);
     } else {
       registros.slice().reverse().forEach(function (r) {
@@ -143,75 +134,58 @@
       });
     }
 
-    $('statViajes').textContent = registros.length;
-    $('statKm').textContent = totalKm;
-    $('statProm').textContent = registros.length ? Math.round(totalKm / registros.length) : 0;
-    resumen.textContent = nombreMes(mes);
+    var label = registros.length === 1 ? 'viaje' : 'viajes';
+    resumen.textContent = nombreMes(mes) + ' · ' + registros.length + ' ' + label + ' · ' + nro(totalKm) + ' km';
+  }
+
+  function fechaTexto(iso, hora) {
+    var f = parseFecha(iso);
+    var d = (f.dia || '--') + '/' + (f.mes || '--') + '/' + (f.anio || '----');
+    return hora ? d + ' ' + hora : d;
   }
 
   function buildItem(r) {
     var div = el('div', 'viaje');
 
-    var top = el('div', 'viaje-top');
-    var info = el('div', 'viaje-info');
+    var ruta = el('div', 'viaje-linea viaje-ruta');
+    ruta.textContent = (r.origen || 'S/D') + ' a ' + (r.destino || 'S/D');
+    div.appendChild(ruta);
 
-    var fechas = el('div', 'viaje-fechas');
-    var salida = el('span', 'chip chip-salida');
-    salida.textContent = 'Salida ' + formatearFecha(r.fechaOrigen) + (r.horaOrigen ? ' ' + r.horaOrigen : '');
-    fechas.appendChild(salida);
-    var llegada = el('span', 'chip chip-llegada');
-    llegada.textContent = 'Llegada ' + formatearFecha(r.fechaDestino) + (r.horaDestino ? ' ' + r.horaDestino : '');
-    fechas.appendChild(llegada);
-    info.appendChild(fechas);
+    var fechas = el('div', 'viaje-linea viaje-fechas');
+    fechas.textContent = 'Salida: ' + fechaTexto(r.fechaOrigen, r.horaOrigen) + '  ·  Llegada: ' + fechaTexto(r.fechaDestino, r.horaDestino);
+    div.appendChild(fechas);
 
-    var ruta = el('div', 'viaje-ruta');
-    var o = el('span', 'lugar');
-    o.textContent = r.origen || 'S/D';
-    var a = document.createElement('span');
-    a.innerHTML = IC_ARROW;
-    var d = el('span', 'lugar');
-    d.textContent = r.destino || 'S/D';
-    ruta.appendChild(o);
-    ruta.appendChild(a);
-    ruta.appendChild(d);
-    info.appendChild(ruta);
+    var km = el('div', 'viaje-linea viaje-km');
+    km.textContent = 'Distancia: ' + (r.distancia >= 0 ? nro(r.distancia) : 'n/d') + ' km';
+    div.appendChild(km);
 
-    top.appendChild(info);
+    var doc = el('div', 'viaje-linea viaje-doc');
+    var partes = [];
+    if (r.comprobante) partes.push('Comp: ' + r.comprobante);
+    if (r.tipoCarga) partes.push('Carga: ' + r.tipoCarga);
+    var marcados = [];
+    if (r.f425a) marcados.push('4.2.5 (a)');
+    if (r.f425b) marcados.push('4.2.5 (b)');
+    if (r.f426) marcados.push('4.2.6');
+    if (r.f4217) marcados.push('4.2.17');
+    if (marcados.length) partes.push('Doc: ' + marcados.join(', '));
+    if (r.observaciones) partes.push('Obs: ' + r.observaciones);
+    doc.textContent = partes.length ? partes.join(' · ') : 'Sin documentación';
+    div.appendChild(doc);
 
-    var side = el('div', 'viaje-side');
-    var km = el('span', 'pill-km');
-    km.textContent = (r.distancia >= 0 ? r.distancia : 'n/d') + ' km';
-    side.appendChild(km);
-
+    var acciones = el('div', 'viaje-acciones');
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn-del';
-    btn.title = 'Borrar viaje';
+    btn.textContent = 'Borrar viaje';
     btn.setAttribute('aria-label', 'Borrar viaje');
-    btn.innerHTML = IC_TRASH;
     btn.addEventListener('click', function () {
       if (window.confirm('¿Borrar este viaje?')) {
         borrarRegistro(r.id);
       }
     });
-    side.appendChild(btn);
-
-    top.appendChild(side);
-    div.appendChild(top);
-
-    var meta = el('div', 'viaje-meta');
-    if (r.comprobante) addChip(meta, 'Comp. ' + r.comprobante);
-    if (r.tipoCarga) addChip(meta, r.tipoCarga);
-    var DOC_LABELS = { f425a: '4.2.5 (a)', f425b: '4.2.5 (b)', f426: '4.2.6', f4217: '4.2.17' };
-    ['f425a', 'f425b', 'f426', 'f4217'].forEach(function (doc) {
-      if (r[doc]) {
-        var c = el('span', 'chip-ok');
-        c.textContent = DOC_LABELS[doc];
-        meta.appendChild(c);
-      }
-    });
-    if (r.observaciones) addChip(meta, r.observaciones);
-    div.appendChild(meta);
+    acciones.appendChild(btn);
+    div.appendChild(acciones);
 
     return div;
   }
@@ -240,11 +214,11 @@
     var fechaOrigen = $('fechaOrigen').value;
     var horaOrigen = $('horaOrigen').value;
     var origen = $('origen').value.trim();
-    var kmOrigen = parseFloat($('kmOrigen').value);
+    var kmOrigen = leerKM($('kmOrigen'));
     var fechaDestino = $('fechaDestino').value;
     var horaDestino = $('horaDestino').value;
     var destino = $('destino').value.trim();
-    var kmDestino = parseFloat($('kmDestino').value);
+    var kmDestino = leerKM($('kmDestino'));
 
     if (!fechaOrigen || !origen || !destino) {
       mostrarToast('Completá fecha, origen y destino');
@@ -417,8 +391,8 @@
 
     if (!$('fechaOrigen').value) $('fechaOrigen').value = hoyISO();
 
-    $('kmOrigen').addEventListener('input', calcularDistancia);
-    $('kmDestino').addEventListener('input', calcularDistancia);
+    $('kmOrigen').addEventListener('input', function () { formatearKM(this); calcularDistancia(); });
+    $('kmDestino').addEventListener('input', function () { formatearKM(this); calcularDistancia(); });
 
     $('camion').addEventListener('change', saveSettings);
     $('conductor').addEventListener('change', saveSettings);
