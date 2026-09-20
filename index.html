@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
-  <link rel="apple-touch-icon" href="icons/icon.jpg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>Planilla de Fletes</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -89,12 +89,17 @@
           <input type="text" id="destino" class="input" inputmode="text" placeholder="Localidad / planta de descarga" required>
         </div>
         <div class="field">
-          <label for="kmDestino">Kilómetros</label>
+          <label for="kmDestino">Kilómetros (odómetro)</label>
           <input type="text" id="kmDestino" class="input" inputmode="numeric" autocomplete="off" placeholder="102.780" required>
         </div>
         <div class="distancia">
           <span>Distancia del viaje</span>
           <output id="distanciaShow" class="distancia-val">—</output>
+        </div>
+        <div class="checks checks-simple">
+          <label class="check">
+            <input type="checkbox" id="kmDoble"> <span>Kilometraje doble (ida y vuelta)</span>
+          </label>
         </div>
       </fieldset>
 
@@ -123,19 +128,27 @@
           </div>
         </div>
 
-        <div class="checks">
-          <label class="check">
-            <input type="checkbox" id="f425a"> <span>4.2.5 (a)</span>
-          </label>
-          <label class="check">
-            <input type="checkbox" id="f425b"> <span>4.2.5 (b)</span>
-          </label>
-          <label class="check">
-            <input type="checkbox" id="f426"> <span>4.2.6</span>
-          </label>
-          <label class="check">
-            <input type="checkbox" id="f4217"> <span>4.2.17</span>
-          </label>
+        <div class="grid-2">
+          <div class="field">
+            <label for="f425a">Estadía 4.2.5 (a) — solo números</label>
+            <input type="text" id="f425a" class="input" inputmode="numeric" autocomplete="off" placeholder="Ej: 3">
+          </div>
+          <div class="field">
+            <label for="f425b">Estadía 4.2.5 (b) — solo números</label>
+            <input type="text" id="f425b" class="input" inputmode="numeric" autocomplete="off" placeholder="Ej: 3">
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label for="f426">Control de descarga 4.2.6 (fecha)</label>
+            <input type="date" id="f426" class="input">
+          </div>
+          <div class="field field-check">
+            <label class="check" for="f4217">
+              <input type="checkbox" id="f4217"> <span>4.2.17</span>
+            </label>
+          </div>
         </div>
 
         <div class="field">
@@ -168,4 +181,4 @@
   <script src="js/xlsx.full.min.js"></script>
   <script src="js/app.js"></script>
 </body>
-</html
+</html>

@@ -34,16 +34,14 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(request).then((cached) => {
-      const fetched = fetch(request)
-        .then((response) => {
-          if (response && response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || fetched;
+      if (cached) return cached;
+      return fetch(request).then((response) => {
+        if (response && response.status === 200 && (response.type === 'basic' || response.type === 'cors')) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        }
+        return response;
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });
