@@ -34,7 +34,8 @@ body {
     radial-gradient(800px 520px at 5% 108%, rgba(148, 163, 184, 0.4), transparent 60%),
     radial-gradient(700px 480px at 50% 55%, rgba(120, 140, 165, 0.16), transparent 65%),
     var(--bg);
-  padding-bottom: calc(160px + env(safe-area-inset-bottom));
+  /* Cambia el 160px por 30px */
+  padding-bottom: calc(30px + env(safe-area-inset-bottom));
   -webkit-font-smoothing: antialiased;
 }
 
@@ -48,8 +49,16 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: #fff;
-  padding: calc(20px + env(safe-area-inset-top)) 20px 18px;
+  /* Padding a la mitad */
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.25);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.3rem; /* Letra más chica, antes era 1.8rem */
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
 
 .topbar-inner {
@@ -61,12 +70,7 @@ body {
   gap: 16px;
 }
 
-.topbar h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 800;
-  letter-spacing: 0.2px;
-}
+
 
 .subtitle {
   margin: 4px 0 0;
@@ -319,19 +323,11 @@ textarea.input { resize: vertical; min-height: 104px; }
 .btn-ghost:hover { background: rgba(220, 38, 38, 0.18); }
 
 .bottombar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 30;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 18px 16px calc(26px + env(safe-area-inset-bottom));
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 20px 16px calc(40px + env(safe-area-inset-bottom));
+  margin-top: 10px;
 }
 
 #btnLimpiar,
@@ -483,4 +479,17 @@ textarea.input { resize: vertical; min-height: 104px; }
 
 @media (max-width: 420px) {
   .checks { grid-template-columns: 1fr; }
+}
+
+/* Reduce el tamaño de los paneles Mes de trabajo y Datos fijos */
+.card:nth-of-type(1) .input-month,
+.card:nth-of-type(2) .input {
+  min-height: 40px;
+  font-size: 1.1rem;
+  padding: 8px 12px;
+}
+.card:nth-of-type(1) h2,
+.card:nth-of-type(2) h2 {
+  font-size: 1rem;
+  margin-bottom: 10px;
 }
